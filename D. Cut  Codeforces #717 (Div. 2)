@@ -1,0 +1,178 @@
+Problem : 
+
+This time Baby Ehab will only cut and not stick. He starts with a piece of paper with an array a of length n written on it, and then he does the following:
+
+he picks a range (l,r) and cuts the subsegment al,al+1,…,ar out, removing the rest of the array.
+he then cuts this range into multiple subranges.
+to add a number theory spice to it, he requires that the elements of every subrange must have their product equal to their least common multiple (LCM).
+Formally, he partitions the elements of al,al+1,…,ar into contiguous subarrays such that the product of every subarray is equal to its LCM. Now, for q independent ranges (l,r), tell Baby Ehab the minimum number of subarrays he needs.
+
+Input
+The first line contains 2 integers n and q (1≤n,q≤105) — the length of the array a and the number of queries.
+
+The next line contains n integers a1, a2, …, an (1≤ai≤105) — the elements of the array a.
+
+Each of the next q lines contains 2 integers l and r (1≤l≤r≤n) — the endpoints of this query's interval.
+
+Output
+For each query, print its answer on a new line.
+
+
+Solution in Java :
+
+
+
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+
+
+public class Solution {
+
+    static int N = 100005, M = 20;
+    static List<Integer>[] primeDivisors = new List[N];
+    static int[][] dp = new int[N][M];
+    static int[] arr = new int[N];
+    static int[] next = new int[N];
+
+    public static void main(String[] args) throws java.lang.Exception {
+        out = new PrintWriter(new BufferedOutputStream(System.out));
+        sc = new FastReader();
+
+        int test = 1;
+        for (int t = 1; t <= test; t++) {
+            solve(t);
+        }
+        out.close();
+    }
+
+    private static void solve(int t) {
+        int n = sc.nextInt();
+        int q = sc.nextInt();
+
+        for (int i = 1; i <= n; i++) {
+            arr[i] = sc.nextInt();
+        }
+
+        // we want to divide our given range(l, r) into sub-ranges such that each subrange lcm = product.
+        // which is only possible when we have all pairwise co-prime(gcd(a, b) = 1) elements in a subrange.
+
+        computePrimeDivisors(n);
+
+        // we can take as many elements in our subrange as possible greedily, to divide our given range into minimum sub-ranges.
+        // so for each starting position of our range l, we define next[l] as the index from where we need to start a new sub-range.
+        // so we would go from l -> next[l] -> next[next[l]]... until <= our right end of range, and the count the number of steps taken.
+
+        // dp[i][j] stores the index we would be at after 2^j jumps, starting from index i.
+        dp[n + 1][0] = n + 1;
+        for (int i = n; i >= 1; i--) {
+            dp[i][0] = dp[i + 1][0];
+
+            for (int primeDivisor : primeDivisors[arr[i]]) {
+                dp[i][0] = Math.min(dp[i][0], next[primeDivisor]);
+                next[primeDivisor] = i;
+            }
+        }
+
+        // to speed up the process, instead of jumping 1 everytime we would make many jumps in one step.
+        // precompute by binary lifting to count the number of steps quickly
+        for (int i = n + 1; i >= 1; i--) {
+            for (int j = 1; j < M; j++) {
+                dp[i][j] = dp[dp[i][j - 1]][j - 1];
+            }
+        }
+
+        for (int i = 0; i < q; i++) {
+            int l = sc.nextInt();
+            int r = sc.nextInt();
+
+            int minSubarraysNeeded = 1;
+            for (int j = 19; j >= 0; j--) {
+                if (dp[l][j] <= r) {
+                    // can make 2^j jumps
+                    minSubarraysNeeded += (1 << j);
+                    l = dp[l][j];
+                }
+            }
+
+            out.println(minSubarraysNeeded);
+        }
+    }
+
+    private static void computePrimeDivisors(int n) {
+        for (int i = 0; i < N; i++) {
+            primeDivisors[i] = new ArrayList<>();
+        }
+
+        for (int i = 2; i < N; i++) {
+            if (primeDivisors[i].isEmpty()) {
+                next[i] = n + 1;
+
+                for (int j = i; j < N; j += i) {
+                    primeDivisors[j].add(i);
+                }
+            }
+        }
+    }
+
+
+    public static FastReader sc;
+    public static PrintWriter out;
+    static class FastReader
+    {
+        BufferedReader br;
+        StringTokenizer str;
+
+        public FastReader()
+        {
+            br = new BufferedReader(new
+                    InputStreamReader(System.in));
+        }
+
+        String next()
+        {
+            while (str == null || !str.hasMoreElements())
+            {
+                try
+                {
+                    str = new StringTokenizer(br.readLine());
+                }
+                catch (IOException  lastMonthOfVacation)
+                {
+                    lastMonthOfVacation.printStackTrace();
+                }
+            }
+            return str.nextToken();
+        }
+
+        int nextInt()
+        {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong()
+        {
+            return Long.parseLong(next());
+        }
+
+        double nextDouble()
+        {
+            return Double.parseDouble(next());
+        }
+
+        String nextLine()
+        {
+            String str = "";
+            try
+            {
+                str = br.readLine();
+            }
+            catch (IOException lastMonthOfVacation)
+            {
+                lastMonthOfVacation.printStackTrace();
+            }
+            return str;
+        }
+    }
+
+}

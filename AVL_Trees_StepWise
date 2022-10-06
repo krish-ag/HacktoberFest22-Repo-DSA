@@ -1,0 +1,213 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int flagg=0; // global variable to check if any rotations are performed so as to output later.
+
+int dup=0; //global variable to check for duplicates
+
+// Tree Node
+class Node
+{
+	public:
+	int key;
+	Node *left;
+	Node *right;
+	int height;
+};
+
+//max of 2 integers
+int max(int a, int b);
+
+// height of the AVL tree
+int height(Node *N)
+{
+	if (N == NULL)
+		return 0;
+	return N->height;
+}
+
+//max of 2 int
+int max(int a, int b)
+{
+	return (a > b)? a : b;
+}
+
+//New node
+Node* newNode(int key)
+{
+	Node* node = new Node();
+	node->key = key;
+	node->left = NULL;
+	node->right = NULL;
+	node->height = 1; 
+					
+	return(node);
+}
+
+//right rotate
+Node *rightRotate(Node *y)
+{
+    cout<<" After Right Rotation around Node "<<y->key<<",";
+	Node *x = y->left;
+	Node *T2 = x->right;
+
+	x->right = y;
+	y->left = T2;
+
+	y->height = max(height(y->left),
+					height(y->right)) + 1;
+	x->height = max(height(x->left),
+					height(x->right)) + 1;
+
+	return x;
+}
+
+//left rotate
+Node *leftRotate(Node *x)
+{
+    cout<<" After Left Rotation around Node "<<x->key<<",";
+	Node *y = x->right;
+	Node *T2 = y->left;
+
+	y->left = x;
+	x->right = T2;
+
+	x->height = max(height(x->left),
+					height(x->right)) + 1;
+	y->height = max(height(y->left),
+					height(y->right)) + 1;  
+
+	return y;
+}
+
+// Get balance factor
+int getBalance(Node *N)
+{
+	if (N == NULL)
+		return 0;
+	return height(N->left) - height(N->right);
+}
+
+void Baalance(Node* N)  //to check if any unbalance remains throughout
+{
+    int balance;
+    if(N==NULL)
+    {
+        balance=0;
+    }
+    if(N==NULL)
+    {
+        return;
+    }
+    balance=height(N->left)-height(N->right);
+    if(balance>1)
+    {
+        cout<<"Node "<<N->key<<" BF becomes 2.";
+    }
+    if(balance<-1)
+    {
+        cout<<"Node "<<N->key<<" BF becomes -2.";   
+    }
+    Baalance(N->left);
+    Baalance(N->right);
+}
+
+
+//insert node
+Node* insert(Node* node, int key)
+{
+	
+	if (node == NULL)
+		{
+            cout<<"Node "<<key<<" inserted into tree.";
+            return(newNode(key));
+        }
+
+	if (key < node->key)
+		node->left = insert(node->left, key);
+	else if (key > node->key)
+		node->right = insert(node->right, key);
+	else 
+		{
+            dup++;
+            cout<<"Duplicate element, hence discarded.";
+            return node;
+        }
+    
+	
+	node->height = 1 + max(height(node->left),
+						height(node->right));
+
+	
+	int balance = getBalance(node);
+
+    
+	
+    if(!(balance<=1 && balance>=-1))
+    {
+        cout<<" Node "<<node->key<<" BF becomes "<<balance<<".";
+    }
+	
+	if (balance > 1 && key < node->left->key)
+		{
+            flagg++;
+            return rightRotate(node);
+        }
+
+	
+	if (balance < -1 && key > node->right->key)
+		{
+            flagg++;
+            return leftRotate(node);
+        }
+
+	if (balance > 1 && key > node->left->key)
+	{
+        flagg++;
+		node->left = leftRotate(node->left);
+        Baalance(node);
+		return rightRotate(node);
+	}
+
+	if (balance < -1 && key < node->right->key)
+	{
+        flagg++;
+		node->right = rightRotate(node->right);
+        Baalance(node);
+		return leftRotate(node);
+	}
+    
+
+	return node;
+}
+
+
+int main()
+{
+	Node *root = NULL;
+
+    int n;cin>>n;
+    for(int i=0;i<n;i++)
+    {
+        flagg=0; //global var
+        dup=0;// global var
+        string s;
+        cin>>s;
+        int num;
+        cin>>num;
+        cout<<"I "<<num<<": ";
+        root = insert(root, num);
+        if(flagg!=0)
+        {
+          cout<<" AVL tree property restored.";
+        }
+        else if(dup==0)
+        {
+          cout<<" No issue with AVL property.";
+        }
+        cout<<endl;
+
+    }	
+	return 0;
+}
+

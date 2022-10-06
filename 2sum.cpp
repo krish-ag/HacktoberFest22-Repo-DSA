@@ -1,17 +1,18 @@
-class Solution {
-public:
-vector<int> twoSum(vector<int>& nums, int target) {
-    unordered_map<int, int> map;
+#include <iostream>
+using namespace std;
+
+int main() {
+
+  int first_number, second_number, sum;
     
-    for (int i = 0;; ++i) {
-        auto it = map.find(target - nums[i]);
-        
-        if (it != map.end()) 
-            return vector<int> {i, it->second};
-            
-        map[nums[i]] = i;
-    }
+  cout << "Enter two integers: ";
+  cin >> first_number >> second_number;
+
+  // sum of two numbers in stored in variable sum of Two Numbers
+  sum = first_number + second_number;
+
+  // prints sum 
+  cout << first_number << " + " <<  second_number << " = " << sum;     
+
+  return 0;
 }
-        
-        
-    };
